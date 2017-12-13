@@ -17,16 +17,15 @@ import sys
 K.set_image_data_format('channels_first')
 
 def load_image():
-    directory = [d for d in os.listdir("Training") if os.path.isdir(os.path.join("Training", d))]
-    label = dict()
+    """ Chargement des images d'entrainement """
+    #directory = [d for d in os.listdir("Training") if os.path.isdir(os.path.join("Training", d))]
 
     imgs = []
     labels = []
     #DEBUG
-    #directory = ['00021', '00025', '00019']
+    directory = ['00021', '00025', '00019', '00061']
     n = 0
     for a in directory: 
-        label[a] = []
         tmp = os.path.join("Training", a)
         files = [os.path.join(tmp, f) 
                       for f in os.listdir(tmp) 
@@ -50,16 +49,15 @@ def load_image():
     return x, y
 
 def load_test():
-    directory = [d for d in os.listdir("Testing") if os.path.isdir(os.path.join("Testing", d))]
-    label = dict()
+    """ Chargement des images de tests """
+    #directory = [d for d in os.listdir("Testing") if os.path.isdir(os.path.join("Testing", d))]
 
     imgs = []
     labels = []
     #DEBUG
-    #directory = ['00021', '00025', '00019']
+    directory = ['00021', '00025', '00019', '00061']
     n = 0
     for a in directory: 
-        label[a] = []
         tmp = os.path.join("Testing", a)
         files = [os.path.join(tmp, f) 
                       for f in os.listdir(tmp) 
@@ -83,6 +81,8 @@ def load_test():
     return x, y
 
 def setmodel():
+    """ On cree notre modele"""
+
     model = Sequential()
 
     model.add(Conv2D(32, (3, 3), padding='same',
@@ -111,10 +111,21 @@ def setmodel():
     return model
 
 def lr_schedule(epoch):
+    """On réduit le learning rate à chaque epoch"""
     return lr * (0.1 ** int(epoch / 10))
 
 def load_single_image(p):
+    """Permet de charger une unique image comme test"""
     return np.rollaxis(resize(skimage.data.imread(p), (64, 64)), -1)
+
+def calcul_accu(predict, labels):
+    """Permet de calculer l'accuracy du modele"""
+    i = 0.
+    sizep = len(predict)
+    for a in predict:
+        if(labels[a] == 1):
+            i+=1
+    return i/sizep
 
 if len(sys.argv) == 3:
     model = load_model(sys.argv[1])
@@ -130,11 +141,12 @@ else:
     model = setmodel()
     lr = 0.01
     sgd = SGD(lr=lr, decay=1e-6, momentum=0.9, nesterov=True)
+    
     model.compile(loss="categorical_crossentropy", optimizer=sgd, metrics=['accuracy'])
 
     model.fit(X, Y,
        batch_size=20,
-       epochs=10,
+       epochs=3,
        validation_split=0.1,
        callbacks=[LearningRateScheduler(lr_schedule), ModelCheckpoint('model.h5', save_best_only=True)]
     )
@@ -142,9 +154,8 @@ else:
     xtest, ytest = load_test()
     print(ytest)
     y_pred = model.predict_classes(xtest)
-    acc = np.sum(y_pred == ytest) / np.size(y_pred)
     model.save("result.h5")
-    print("Test accuracy = {}".format(acc))
+    print("Test accuracy = "+ str(calcul_accu(y_pred,ytest)))
     #print(y_pred)
     #print(ytest)
 
