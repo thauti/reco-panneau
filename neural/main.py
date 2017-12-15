@@ -49,7 +49,7 @@ def load_image():
     return x, y
 
 def load_test():
-    """ Chargement des images de tests """
+    """ Chargement des images de test """
     #directory = [d for d in os.listdir("Testing") if os.path.isdir(os.path.join("Testing", d))]
 
     imgs = []
@@ -122,8 +122,9 @@ def calcul_accu(predict, labels):
     """Permet de calculer l'accuracy du modele"""
     i = 0.
     sizep = len(predict)
-    for a in predict:
-        if(labels[a] == 1):
+    print(predict)
+    for a, d in np.ndenumerate(predict):
+        if(labels[a] == d):
             i+=1
     return i/sizep
 
