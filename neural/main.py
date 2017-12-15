@@ -16,14 +16,19 @@ import sys
 
 K.set_image_data_format('channels_first')
 
+directory = ['00021', '00025', '00019', '00061']
+
+#Décommenter pour utiliser toutes les classes
+#directory = [d for d in os.listdir("Training") if os.path.isdir(os.path.join("Training", d))]
+
 def load_image():
     """ Chargement des images d'entrainement """
-    #directory = [d for d in os.listdir("Training") if os.path.isdir(os.path.join("Training", d))]
+    #
 
     imgs = []
     labels = []
     #DEBUG
-    directory = ['00021', '00025', '00019', '00061']
+    global directory
     n = 0
     for a in directory: 
         tmp = os.path.join("Training", a)
@@ -50,12 +55,10 @@ def load_image():
 
 def load_test():
     """ Chargement des images de test """
-    #directory = [d for d in os.listdir("Testing") if os.path.isdir(os.path.join("Testing", d))]
-
     imgs = []
     labels = []
-    #DEBUG
-    directory = ['00021', '00025', '00019', '00061']
+    #Limite
+    global directory 
     n = 0
     for a in directory: 
         tmp = os.path.join("Testing", a)
@@ -133,8 +136,6 @@ if len(sys.argv) == 3:
     img = load_single_image(sys.argv[2])
     print(sys.argv[2])
     img =  np.expand_dims(img, axis=0)
-    #X, Y  = load_image()
-
     res = model.predict_classes(img, verbose=1)
     print(res)
 else:
@@ -157,7 +158,5 @@ else:
     y_pred = model.predict_classes(xtest)
     model.save("result.h5")
     print("Test accuracy = "+ str(calcul_accu(y_pred,ytest)))
-    #print(y_pred)
-    #print(ytest)
 
 K.clear_session()
